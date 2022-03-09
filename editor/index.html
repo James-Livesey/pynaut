@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pynaut</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="style.css">
+        <script src="lib/skulpt.min.js"></script>
+        <script src="lib/skulpt-stdlib.js"></script>
+        <script type="module" src="script.js"></script>
+    </head>
+    <body>
+        <nav>
+            <button id="runButton">Run</button>
+        </nav>
+        <main>
+            <section id="editor">
+                <pynaut-editor>
+                    <pynaut-code contenteditable="true">
+                        <pynaut-line>print("Hello, world!")</pynaut-line>
+                        <pynaut-line># Testing!</pynaut-line>
+                    </pynaut-code>
+                </pynaut-editor>
+            </section>
+            <section id="console">
+                <textarea></textarea>
+            </section>
+        </main>
+    </body>
+</html>

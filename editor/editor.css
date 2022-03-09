@@ -1,0 +1,39 @@
+:root {
+    --editor-lineNumber: #bbbbbb;
+}
+
+pynaut-editor {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+pynaut-editor, pynaut-editor * {
+    font-family: "Noto Sans Mono", monospace;
+}
+
+pynaut-code {
+    display: block;
+    width: 100%;
+    min-height: 100%;
+    counter-reset: line;
+    outline: none;
+}
+
+pynaut-line {
+    display: block;
+    white-space: pre;
+    counter-increment: line;
+}
+
+pynaut-line::before {
+    position: sticky;
+    display: inline-block;
+    width: 2rem;
+    left: 0;
+    padding-right: 1rem;
+    text-align: end;
+    color: var(--editor-lineNumber);
+    content: counter(line);
+}
