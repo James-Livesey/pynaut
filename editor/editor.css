@@ -21,19 +21,20 @@ pynaut-code {
     outline: none;
 }
 
-pynaut-line {
+div[pynaut-line] {
     display: block;
     white-space: pre;
     counter-increment: line;
 }
 
-pynaut-line::before {
+div[pynaut-line]::before {
     position: sticky;
     display: inline-block;
     width: 2rem;
     left: 0;
-    padding-right: 1rem;
+    padding-inline-end: 1rem;
     text-align: end;
+    background-color: var(--primaryBackground);
     color: var(--editor-lineNumber);
     content: counter(line);
 }
