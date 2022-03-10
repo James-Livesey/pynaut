@@ -1,3 +1,5 @@
+export const KEYWORDS = ["False", "None", "True", "and", "as", "assert", "break", "class", "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return", "try", "while", "with", "yield"];
+
 export class Editor {
     constructor(element) {
         this.element = element;
@@ -76,6 +78,66 @@ export class Editor {
 
         this.element.querySelector("pynaut-code").addEventListener("keydown", function() {
             thisScope.clean();
+        });
+
+        this.element.querySelector("pynaut-code").addEventListener("keyup", function(event) {
+            if (event.key == "Enter") { // TODO: Implement for every keypress
+                thisScope.highlight();
+            }
+        });
+    }
+
+    highlight() {
+        this.element.querySelectorAll("div[pynaut-line]").forEach(function(lineElement) {
+            var lineToParse = lineElement.textContent;
+            var tokenToAdd = "";
+
+            function matchesToken(token) {
+                var matches = lineToParse.match(new RegExp(`^(?:${token})`));
+
+                if (matches) {
+                    tokenToAdd = matches[0];
+                    lineToParse = lineToParse.substring(matches[0].length);
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            function addToken(type) {
+                var tokenElement = document.createElement("span");
+
+                tokenElement.setAttribute("pynaut-type", type);
+
+                tokenElement.innerText = tokenToAdd;
+
+                lineElement.append(tokenElement);
+            }
+
+            lineElement.innerHTML = "";
+
+            while (lineToParse.length > 0) {
+                if (matchesToken("#.*")) {
+                    addToken("comment");
+                    break;
+                }
+
+                if (matchesToken(KEYWORDS.join("|"))) {
+                    addToken("keyword");
+
+                    continue;
+                }
+
+                if (matchesToken("\\s+")) {
+                    addToken("whitespace");
+
+                    continue;
+                }
+
+                matchesToken("[^\\s]+");
+                addToken("other");
+            }
         });
     }
 }

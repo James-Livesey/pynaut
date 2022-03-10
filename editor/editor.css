@@ -1,5 +1,7 @@
 :root {
     --editor-lineNumber: #bbbbbb;
+    --editor-comment: #808080;
+    --editor-keyword: #fcb900;
 }
 
 pynaut-editor {
@@ -37,4 +39,13 @@ div[pynaut-line]::before {
     background-color: var(--primaryBackground);
     color: var(--editor-lineNumber);
     content: counter(line);
+}
+
+div[pynaut-line] span[pynaut-type="comment"] {
+    color: var(--editor-comment);
+    font-style: italic;
+}
+
+div[pynaut-line] span[pynaut-type="keyword"] {
+    color: var(--editor-keyword);
 }
