@@ -1,7 +1,9 @@
 :root {
     --editor-lineNumber: #bbbbbb;
     --editor-comment: #808080;
-    --editor-keyword: #fcb900;
+    --editor-keyword: #ebac00;
+    --editor-subroutine: #8100eb;
+    --editor-variable: #0076eb;
 }
 
 pynaut-editor {
@@ -41,6 +43,10 @@ div[pynaut-line]::before {
     content: counter(line);
 }
 
+div[pynaut-line] br {
+    display: none;
+}
+
 div[pynaut-line] span[pynaut-type="comment"] {
     color: var(--editor-comment);
     font-style: italic;
@@ -48,4 +54,12 @@ div[pynaut-line] span[pynaut-type="comment"] {
 
 div[pynaut-line] span[pynaut-type="keyword"] {
     color: var(--editor-keyword);
+}
+
+div[pynaut-line] span[pynaut-type="subroutine"] {
+    color: var(--editor-subroutine);
+}
+
+div[pynaut-line] span[pynaut-type="variable"] {
+    color: var(--editor-variable);
 }

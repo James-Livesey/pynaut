@@ -81,8 +81,18 @@ export class Editor {
         });
 
         this.element.querySelector("pynaut-code").addEventListener("keyup", function(event) {
-            if (event.key == "Enter") { // TODO: Implement for every keypress
-                thisScope.highlight();
+            thisScope.element.querySelectorAll("div[pynaut-line] br").forEach((element) => element.remove());
+
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+                return;
+            }
+
+            var selection = thisScope.saveSelection();
+
+            thisScope.highlight();
+
+            if (event.key != "Enter") {
+                thisScope.restoreSelection(selection);
             }
         });
     }
@@ -92,10 +102,10 @@ export class Editor {
             var lineToParse = lineElement.textContent;
             var tokenToAdd = "";
 
-            function matchesToken(token) {
+            function matchesToken(token, contextAfter = ".*") {
                 var matches = lineToParse.match(new RegExp(`^(?:${token})`));
 
-                if (matches) {
+                if (matches && lineToParse.substring(matches[0].length).match(contextAfter)) {
                     tokenToAdd = matches[0];
                     lineToParse = lineToParse.substring(matches[0].length);
 
@@ -133,9 +143,83 @@ export class Editor {
                     continue;
                 }
 
-                matchesToken("[^\\s]+");
+                if (matchesToken("[a-zA-Z_][a-zA-Z0-9_]*", "\\w*\\(")) {
+                    addToken("subroutine");
+                    continue;
+                }
+
+                if (matchesToken("[a-zA-Z_][a-zA-Z0-9_]*")) {
+                    addToken("variable");
+                    continue;
+                }
+
+                matchesToken(".");
                 addToken("other");
+            }
+
+            if (lineElement.innerHTML == "") {
+                lineElement.textContent = "\u200B";
             }
         });
     }
+
+    // `saveSelection` and `restoreSelection` based off of https://stackoverflow.com/a/13950376
+
+    saveSelection() {
+        if (window.getSelection().rangeCount == 0) {
+            return new exports.Selection(0, 0);
+        }
+
+        var range = window.getSelection().getRangeAt(0);
+        var startRange = range.cloneRange();
+
+        startRange.selectNodeContents(this.element);
+        startRange.setEnd(range.startContainer, range.startOffset);
+
+        return {start: startRange.toString().length, end: startRange.toString().length + range.toString().length};
+    }
+
+    restoreSelection(selection) {
+        var index = 0;
+        var range = document.createRange();
+
+        range.setStart(this.element, 0);
+        range.collapse(true);
+
+        var elementStack = [this.element];
+        var element = null;
+        var foundStart = false;
+        var shouldStop = false;
+
+        while (!shouldStop && (element = elementStack.pop())) {
+            if (element.nodeType == Node.TEXT_NODE) {
+                var nextIndex = index + element.length;
+
+                if (!foundStart && selection.start >= index && selection.start <= nextIndex) {
+                    range.setStart(element, selection.start - index);
+
+                    foundStart = true;
+                }
+
+                if (foundStart && selection.end >= index && selection.end <= index) {
+                    range.setEnd(element, selection.end - index);
+
+                    shouldStop = true;
+                }
+
+                index = nextIndex;
+            } else {
+                var i = element.childNodes.length;
+
+                while (i--) {
+                    elementStack.push(element.childNodes[i]);
+                }
+            }
+        }
+
+        var newSelection = window.getSelection();
+
+        newSelection.removeAllRanges();
+        newSelection.addRange(range);
+    };
 }
