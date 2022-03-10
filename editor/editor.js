@@ -125,13 +125,11 @@ export class Editor {
 
                 if (matchesToken(KEYWORDS.join("|"))) {
                     addToken("keyword");
-
                     continue;
                 }
 
                 if (matchesToken("\\s+")) {
                     addToken("whitespace");
-
                     continue;
                 }
 
