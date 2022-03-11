@@ -125,7 +125,7 @@ export class Editor {
                     break;
                 }
 
-                if (matchesTokens(KEYWORDS)) {
+                if (matchesToken(`\\b(?:b${KEYWORDS.join("|")})\\b`)) {
                     addToken("keyword");
                     continue;
                 }
