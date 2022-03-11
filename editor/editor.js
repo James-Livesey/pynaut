@@ -234,7 +234,7 @@ export class Editor {
                     break;
                 }
 
-                if (matchesToken(`\\b(?:b${KEYWORDS.join("|")})\\b`)) {
+                if (matchesToken(`\\b(?:${KEYWORDS.join("|")})\\b`)) {
                     addToken("keyword");
                     continue;
                 }
