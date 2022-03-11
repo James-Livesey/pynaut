@@ -1,6 +1,7 @@
 import * as editor from "./editor.js";
 
 var readCallback = function() {};
+var firstRun = true;
 
 function consoleWrite(text) {
     for (var i = 0; i < text.length; i++) {
@@ -13,6 +14,8 @@ function consoleWrite(text) {
 
         document.querySelector("#consoleOutput > span:last-child").textContent += text[i];
     }
+
+    document.querySelector("#console .scroll").scrollTo(0, document.querySelector("#console .scroll").scrollHeight);
 }
 
 function consoleRead() {
@@ -21,10 +24,20 @@ function consoleRead() {
     });
 }
 
+function consoleNew() {
+    document.querySelector("#consoleOutput").append(document.createElement("hr"));
+
+    consoleWrite("\n");
+}
+
 window.addEventListener("load", function() {
     var mainEditor = new editor.Editor(document.querySelector("#editor"));
 
     document.querySelector("#runButton").addEventListener("click", function() {
+        if (!firstRun) {
+            consoleNew();
+        }
+
         Sk.configure({
             inputfun: function(text) {
                 consoleWrite(text);
@@ -39,6 +52,8 @@ window.addEventListener("load", function() {
         Sk.misceval.asyncToPromise(function() {
             return Sk.importMainWithBody("<stdin>", false, mainEditor.code, true);
         });
+
+        firstRun = false;
     });
 
     document.querySelector("#consoleInput").addEventListener("keydown", function(event) {
