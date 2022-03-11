@@ -39,6 +39,7 @@ textarea[pynaut-data] {
     outline: none;
     resize: none;
     font-size: 1rem;
+    z-index: 1;
 }
 
 pynaut-scroll {

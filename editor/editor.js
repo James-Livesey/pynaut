@@ -20,8 +20,117 @@ export class Editor {
         this.internalInput.value = value;
     }
 
+    insertCode(value) {
+        var selectionStart = this.internalInput.selectionStart;
+
+        this.code = (
+            this.code.substring(0, this.internalInput.selectionStart) +
+            value +
+            this.code.substring(this.internalInput.selectionEnd)
+        );
+
+        this.internalInput.selectionStart = selectionStart + value.length;
+        this.internalInput.selectionEnd = selectionStart + value.length;
+
+        this.render();
+    }
+
+    getLineIndex() {
+        return this.code.substring(0, this.internalInput.selectionStart).split("\n").length - 1;
+    }
+
+    getColumnIndex() {
+        var lines = this.code.substring(0, this.internalInput.selectionStart).split("\n");
+
+        return lines[lines.length - 1].length;
+    }
+
+    getSelectedLineCount() {
+        return this.code.substring(0, this.internalInput.selectionEnd).split("\n").length - this.getLineIndex();
+    }
+
+    getLine(lineIndex = this.getLineIndex()) {
+        return this.code.split("\n")[lineIndex];
+    }
+
+    setLine(text, lineIndex = this.getLineIndex()) {
+        var lines = this.code.split("\n");
+
+        console.log(lines);
+        lines[lineIndex] = text;
+        console.log(lines, lines.join("\n"));
+
+        this.code = lines.join("\n");
+    }
+
     attachEvents() {
         var thisScope = this;
+
+        this.internalInput.addEventListener("keydown", function(event) {
+            switch (event.key) {
+                case "Tab":
+                    event.preventDefault();
+
+                    var lineIndex = thisScope.getLineIndex();
+                    var lineCount = thisScope.getSelectedLineCount();
+
+                    thisScope.internalInput.selectionStart -= thisScope.getColumnIndex();
+
+                    var selectionStart = thisScope.internalInput.selectionStart;
+
+                    if (event.shiftKey) {
+                        for (var i = lineIndex; i < lineIndex + lineCount; i++) {
+                            var selectionEnd = thisScope.internalInput.selectionEnd;
+                            var dedentSpaceCount = thisScope.getLine(i).match(/^\s{0,4}/)[0].length;
+
+                            thisScope.setLine(thisScope.getLine(i).substring(dedentSpaceCount), i);
+                            thisScope.render();
+
+                            thisScope.internalInput.selectionEnd = selectionEnd - dedentSpaceCount;
+                        }
+
+                        thisScope.internalInput.selectionStart = selectionStart;
+
+                        break;
+                    }
+
+                    if (thisScope.getLine().substring(0, thisScope.getColumnIndex()).trim() != "") {
+                        thisScope.insertCode("    ");
+
+                        break;
+                    }
+
+                    for (var i = lineIndex; i < lineIndex + lineCount; i++) {
+                        var selectionEnd = thisScope.internalInput.selectionEnd;
+
+                        thisScope.setLine("    " + thisScope.getLine(i), i);
+                        thisScope.render();
+
+                        thisScope.internalInput.selectionEnd = selectionEnd + 4;
+                    }
+
+                    thisScope.internalInput.selectionStart = selectionStart + 4;
+
+                    break;
+
+                case "Enter":
+                    var spaceCount = thisScope.getLine().match(/^\s*/)[0].length;
+
+                    if (thisScope.getLine().substring(0, thisScope.getColumnIndex()).trim() == "") {
+                        break;
+                    }
+
+                    if (thisScope.getLine().endsWith(":")) {
+                        spaceCount += 4;
+                    }
+
+                    event.preventDefault();
+
+                    thisScope.insertCode("\n" + " ".repeat(spaceCount));
+
+                    break;
+            }
+        });
 
         this.internalInput.addEventListener("input", function() {
             thisScope.render();
