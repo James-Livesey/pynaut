@@ -1,9 +1,14 @@
 :root {
     --editor-lineNumber: #bbbbbb;
+    --editor-caretColour: black;
     --editor-comment: #808080;
     --editor-keyword: #ebac00;
+    --editor-operator: #d400eb;
+    --editor-number: #00b8eb;
     --editor-subroutine: #8100eb;
     --editor-variable: #0076eb;
+    --editor-string: #02b84b;
+    --editor-escape: #eb7600;
 }
 
 pynaut-editor {
@@ -29,9 +34,10 @@ textarea[pynaut-data] {
     border: none;
     background-color: transparent;
     color: transparent;
-    caret-color: black;
+    caret-color: var(--editor-caretColour);
     white-space: pre;
-    outline: 0;
+    outline: none;
+    resize: none;
     font-size: 1rem;
 }
 
@@ -81,10 +87,26 @@ div[pynaut-line] span[pynaut-type="keyword"] {
     color: var(--editor-keyword);
 }
 
+div[pynaut-line] span[pynaut-type="operator"] {
+    color: var(--editor-operator);
+}
+
+div[pynaut-line] span[pynaut-type="number"] {
+    color: var(--editor-number);
+}
+
 div[pynaut-line] span[pynaut-type="subroutine"] {
     color: var(--editor-subroutine);
 }
 
 div[pynaut-line] span[pynaut-type="variable"] {
     color: var(--editor-variable);
+}
+
+div[pynaut-line] span[pynaut-type="string"] {
+    color: var(--editor-string);
+}
+
+div[pynaut-line] span[pynaut-type="escape"] {
+    color: var(--editor-escape);
 }

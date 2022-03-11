@@ -1,12 +1,11 @@
 export const KEYWORDS = ["False", "None", "True", "and", "as", "assert", "break", "class", "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return", "try", "while", "with", "yield"];
-
-function getRemSize() {
-    return parseFloat(getComputedStyle(document.documentElement).fontSize);
-}
+export const OPERATORS = ["+", "-", "*", "/", "%", "**", "//", "=", "+=", "-=", "*=", "/=", "%=", "//=", "**=", "&=", "|=", "^=", ">>=", "<<=", "==", "!=", ">", "<", ">=", "<=", "&", "|", "^", "~", "<<", ">>"];
 
 export class Editor {
     constructor(element) {
         this.element = element;
+        this.codeElement = element.querySelector("pynaut-code");
+        this.internalInput = element.querySelector("textarea[pynaut-data]");
 
         this._selectionStart = 0;
 
@@ -14,37 +13,33 @@ export class Editor {
     }
 
     get code() {
-        return this.element.querySelector("textarea[pynaut-data]").value;
+        return this.internalInput.value;
     }
 
     set code(value) {
-        this.element.querySelector("textarea[pynaut-data]").value = value;
+        this.internalInput.value = value;
     }
 
     attachEvents() {
         var thisScope = this;
 
-        // TODO: Customise caret colour and add scroll syncing
-
-        document.body.addEventListener("keydown", function(event) {
-            if (event.shiftKey && ["KeyUp", "KeyDown", "KeyLeft", "KeyRight"].includes(event.key)) {
-                thisScope.element.querySelector("pynaut-code").focus();
-
-                return;
-            }
-
-            thisScope.element.querySelector("textarea[pynaut-data]").focus();
+        this.internalInput.addEventListener("input", function() {
+            thisScope.render();
         });
 
-        this.element.querySelector("textarea[pynaut-data]").addEventListener("input", function() {
-            thisScope.render();
+        this.internalInput.addEventListener("scroll", function() {
+            thisScope.element.querySelector("pynaut-scroll").scrollTop = thisScope.internalInput.scrollTop;
+            thisScope.element.querySelector("pynaut-scroll").scrollLeft = thisScope.internalInput.scrollLeft;
         });
     }
 
     render() {
         var thisScope = this;
 
-        this.element.querySelector("pynaut-code").innerHTML = "";
+        this.codeElement.innerHTML = "";
+
+        var stringOpener = null;
+        var inMultilineString = false;
 
         this.code.split("\n").forEach(function(line) {
             var lineElement = document.createElement("div");
@@ -66,6 +61,19 @@ export class Editor {
                 return false;
             }
 
+            function matchesTokens(tokens) {
+                for (var i = 0; i < tokens.length; i++) {
+                    if (lineToParse.startsWith(tokens[i])) {
+                        tokenToAdd = lineToParse.substring(0, tokens[i].length);
+                        lineToParse = lineToParse.substring(tokens[i].length);
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
             function addToken(type) {
                 var tokenElement = document.createElement("span");
 
@@ -77,18 +85,68 @@ export class Editor {
             }
 
             while (lineToParse.length > 0) {
+                if (matchesToken("\\\\.?")) {
+                    addToken("escape");
+                    continue;
+                }
+
+                if (stringOpener != null) {
+                    if (matchesToken(stringOpener)) {
+                        addToken("string");
+
+                        stringOpener = null;
+                        inMultilineString = false;
+
+                        continue;
+                    }
+
+                    matchesToken(".");
+                    addToken("string");
+                    continue;
+                }
+
+                if (matchesToken("\"\"\"|'''")) {
+                    stringOpener = tokenToAdd;
+                    inMultilineString = true;
+
+                    addToken("string");
+                    continue;
+                }
+
+                if (matchesToken("\"|'")) {
+                    stringOpener = tokenToAdd;
+
+                    addToken("string");
+                    continue;
+                }
+
                 if (matchesToken("#.*")) {
                     addToken("comment");
                     break;
                 }
 
-                if (matchesToken(KEYWORDS.join("|"))) {
+                if (matchesTokens(KEYWORDS)) {
                     addToken("keyword");
                     continue;
                 }
 
                 if (matchesToken("\\s+")) {
                     addToken("whitespace");
+                    continue;
+                }
+                
+                if (matchesTokens(OPERATORS)) {
+                    addToken("operator");
+                    continue;
+                }
+
+                if (
+                    matchesToken("0(x|X)[0-9a-fA-F]+n?") ||
+                    matchesToken("0(b|B)[01]+n?") ||
+                    matchesToken("0(o|O)?[0-7]+n?") ||
+                    matchesToken("(?:(?:[0-9]+\\.[0-9]*)|(?:[0-9]*\\.[0-9]+)|(?:[0-9]+))(?:[eE][+-]?[0-9]+)?")
+                ) {
+                    addToken("number");
                     continue;
                 }
 
@@ -106,9 +164,13 @@ export class Editor {
                 addToken("other");
             }
 
+            if (tokenToAdd != "\\" && !inMultilineString) {
+                stringOpener = null;
+            }
+
             lineElement.append(document.createTextNode("\u200B"));
 
-            thisScope.element.querySelector("pynaut-code").append(lineElement);
+            thisScope.codeElement.append(lineElement);
         });
     }
 }
