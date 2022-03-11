@@ -50,7 +50,15 @@ window.addEventListener("load", function() {
         });
 
         Sk.misceval.asyncToPromise(function() {
-            return Sk.importMainWithBody("<stdin>", false, mainEditor.code, true);
+            return Sk.importMainWithBody("main", false, mainEditor.code, true);
+        }).catch(function(error) {
+            consoleWrite(error.toString() + "\n");
+
+            if (error.traceback) {
+                error.traceback.forEach(function(trace) {
+                    consoleWrite(`    in ${trace.filename} (line ${trace.lineno})`);
+                });
+            }
         });
 
         firstRun = false;
