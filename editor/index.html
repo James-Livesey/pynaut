@@ -3,6 +3,7 @@
     <head>
         <title>Pynaut</title>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
         <link rel="stylesheet" href="style.css">
         <script src="lib/skulpt.min.js"></script>
         <script src="lib/skulpt-stdlib.js"></script>
@@ -15,15 +16,15 @@
         <main>
             <section id="editor">
                 <pynaut-editor>
-                    <textarea pynaut-data>print("Hello, world!")</textarea>
+                    <textarea pynaut-data></textarea>
                     <pynaut-scroll>
-                        <pynaut-code><div pynaut-line>print("Hello, world!")</div></pynaut-code>
+                        <pynaut-code><div pynaut-line></div></pynaut-code>
                     </pynaut-scroll>
                 </pynaut-editor>
             </section>
             <section id="console">
                 <div class="scroll">
-                    <span id="consoleOutput"><span></span></span><span contenteditable="true" id="consoleInput"></span>
+                    <span id="consoleOutput"><span></span></span><span id="consoleInput"></span>
                 </div>
             </section>
         </main>

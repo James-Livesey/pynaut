@@ -6,6 +6,7 @@
     --primaryForeground: black;
     --secondaryBackground: #ebebeb;
     --secondaryForeground: black;
+    --error: #ee3333;
 }
 
 * {
@@ -84,6 +85,14 @@ hr + br {
 
 #consoleOutput > span {
     white-space: pre-wrap;
+}
+
+#consoleOutput .error {
+    color: red;
+}
+
+#consoleOutput .old {
+    opacity: 0.6;
 }
 
 #consoleInput {

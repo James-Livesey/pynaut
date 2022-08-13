@@ -18,6 +18,8 @@ export class Editor {
 
     set code(value) {
         this.internalInput.value = value;
+
+        this.render();
     }
 
     insertCode(value) {
